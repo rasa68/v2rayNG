@@ -564,13 +564,5 @@
     <string name="sub_info_open_support">Dəstək linkini aç</string>
     <string name="sub_info_open_page">Abunəlik məlumat səhifəsini aç</string>
     <string name="sub_info_unlimited">Limitsiz</string>
-    <string name="sub_info_traffic_used">İstifadə olunan: %1$s / %2$s</string>
-    <string name="sub_info_traffic_left">Qalan: %1$s</string>
-    <string name="sub_info_expires">Bitmə tarixi: %1$s</string>
-    <string name="sub_info_no_expiry">Bitmə tarixi yoxdur</string>
-    <string name="sub_info_expired">Müddəti bitib</string>
-    <string name="sub_info_time_left_dh">%1$d gün %2$d saat qalıb</string>
-    <string name="sub_info_time_left_hm">%1$d saat %2$d dəq qalıb</string>
-    <string name="sub_info_time_left_m">%1$d dəq qalıb</string>
 
 </resources>

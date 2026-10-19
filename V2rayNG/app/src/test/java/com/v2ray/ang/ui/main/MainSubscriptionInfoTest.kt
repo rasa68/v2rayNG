@@ -11,19 +11,17 @@ class MainSubscriptionInfoTest {
     private val now = 1_000_000_000_000L // ms
 
     @Test
-    fun limitedTrafficComputesLeftAndFraction() {
+    fun limitedTrafficComputesFraction() {
         val model = buildSubscriptionInfoUiModel(SubscriptionUsageInfo(upload = 100, download = 300, total = 1000), now)
         assertEquals(400, model.usedBytes)
-        assertEquals(600L, model.leftBytes)
         assertEquals(0.4f, model.trafficFraction!!, 0.0001f)
         assertFalse(model.trafficLow)
     }
 
     @Test
-    fun unlimitedTrafficHasNoLeftOrFraction() {
+    fun unlimitedTrafficHasNoFraction() {
         val model = buildSubscriptionInfoUiModel(SubscriptionUsageInfo(download = 5), now)
         assertEquals(0L, model.totalBytes)
-        assertNull(model.leftBytes)
         assertNull(model.trafficFraction)
         assertFalse(model.trafficLow)
     }
@@ -31,24 +29,22 @@ class MainSubscriptionInfoTest {
     @Test
     fun overUsageIsClampedAndFlaggedLow() {
         val model = buildSubscriptionInfoUiModel(SubscriptionUsageInfo(download = 2000, total = 1000), now)
-        assertEquals(0L, model.leftBytes)
         assertEquals(1f, model.trafficFraction!!, 0.0001f)
         assertTrue(model.trafficLow)
     }
 
     @Test
-    fun timeLeftIsSplitIntoDaysHoursMinutes() {
-        val expire = now / 1000 + (2 * 86_400 + 3 * 3_600 + 4 * 60) + 30
-        val model = buildSubscriptionInfoUiModel(SubscriptionUsageInfo(expire = expire), now)
-        assertEquals(SubscriptionTimeLeft.Left(2, 3, 4), model.timeLeft)
-        assertEquals(expire * 1000, model.expireMillis)
+    fun expiryIsConvertedToMillisAndFlaggedWhenPast() {
+        val future = buildSubscriptionInfoUiModel(SubscriptionUsageInfo(expire = now / 1000 + 60), now)
+        assertEquals(now + 60_000, future.expireMillis)
+        assertFalse(future.expired)
+        assertTrue(buildSubscriptionInfoUiModel(SubscriptionUsageInfo(expire = now / 1000 - 1), now).expired)
     }
 
     @Test
-    fun pastExpiryIsExpiredAndZeroMeansNoExpiry() {
-        assertEquals(SubscriptionTimeLeft.Expired, buildSubscriptionInfoUiModel(SubscriptionUsageInfo(expire = now / 1000 - 1), now).timeLeft)
-        val none = buildSubscriptionInfoUiModel(SubscriptionUsageInfo(expire = 0), now)
-        assertEquals(SubscriptionTimeLeft.NoExpiry, none.timeLeft)
-        assertNull(none.expireMillis)
+    fun zeroExpireMeansNeverExpires() {
+        val model = buildSubscriptionInfoUiModel(SubscriptionUsageInfo(expire = 0), now)
+        assertNull(model.expireMillis)
+        assertFalse(model.expired)
     }
 }

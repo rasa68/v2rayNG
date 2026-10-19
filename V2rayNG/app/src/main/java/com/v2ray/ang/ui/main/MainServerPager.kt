@@ -108,7 +108,8 @@ fun GroupPagerPage(
             SubscriptionInfoCard(
                 info = usageInfo,
                 fallbackTitle = groupTitle,
-                onOpenLink = onOpenLink
+                onOpenLink = onOpenLink,
+                onRefresh = { mainViewModel.onAction(MainAction.UpdateGroupSubscription(groupId)) }
             )
         }
         Box(Modifier.weight(1f)) {

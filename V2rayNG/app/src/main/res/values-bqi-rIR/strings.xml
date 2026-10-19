@@ -563,13 +563,5 @@
     <string name="sub_info_open_support">واز کردن لینگ پشتیوانی</string>
     <string name="sub_info_open_page">واز کردن صفحه اطلاعات اشتراک</string>
     <string name="sub_info_unlimited">بی‌حد</string>
-    <string name="sub_info_traffic_used">مصرف‌بیه %1$s از %2$s</string>
-    <string name="sub_info_traffic_left">%1$s مونده</string>
-    <string name="sub_info_expires">انقضا: %1$s</string>
-    <string name="sub_info_no_expiry">بی تاریخ انقضا</string>
-    <string name="sub_info_expired">منقضی بیه</string>
-    <string name="sub_info_time_left_dh">%1$d روز و %2$d ساعت مونده</string>
-    <string name="sub_info_time_left_hm">%1$d ساعت و %2$d دقیقه مونده</string>
-    <string name="sub_info_time_left_m">%1$d دقیقه مونده</string>
 
 </resources>

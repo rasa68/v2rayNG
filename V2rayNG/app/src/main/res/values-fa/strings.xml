@@ -560,5 +560,16 @@
     <string name="tasker_blurb_stop">توقف %1$s</string>
     <string name="connection_test_empty_message">جزئیاتی در دسترس نیست</string>
     <string name="value_unknown">ناشناخته</string>
+    <string name="sub_info_open_support">باز کردن لینک پشتیبانی</string>
+    <string name="sub_info_open_page">باز کردن صفحه اطلاعات اشتراک</string>
+    <string name="sub_info_unlimited">نامحدود</string>
+    <string name="sub_info_traffic_used">مصرف‌شده %1$s از %2$s</string>
+    <string name="sub_info_traffic_left">%1$s باقی‌مانده</string>
+    <string name="sub_info_expires">انقضا: %1$s</string>
+    <string name="sub_info_no_expiry">بدون تاریخ انقضا</string>
+    <string name="sub_info_expired">منقضی شده</string>
+    <string name="sub_info_time_left_dh">%1$d روز و %2$d ساعت باقی‌مانده</string>
+    <string name="sub_info_time_left_hm">%1$d ساعت و %2$d دقیقه باقی‌مانده</string>
+    <string name="sub_info_time_left_m">%1$d دقیقه باقی‌مانده</string>
 
 </resources>

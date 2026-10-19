@@ -558,5 +558,16 @@
     <string name="tasker_blurb_stop">停止 %1$s</string>
     <string name="connection_test_empty_message">沒有詳細資訊</string>
     <string name="value_unknown">未知</string>
+    <string name="sub_info_open_support">開啟支援連結</string>
+    <string name="sub_info_open_page">開啟訂閱資訊頁面</string>
+    <string name="sub_info_unlimited">無限制</string>
+    <string name="sub_info_traffic_used">已用 %1$s / %2$s</string>
+    <string name="sub_info_traffic_left">剩餘 %1$s</string>
+    <string name="sub_info_expires">到期時間 %1$s</string>
+    <string name="sub_info_no_expiry">無到期時間</string>
+    <string name="sub_info_expired">已過期</string>
+    <string name="sub_info_time_left_dh">剩餘 %1$d 天 %2$d 小時</string>
+    <string name="sub_info_time_left_hm">剩餘 %1$d 小時 %2$d 分鐘</string>
+    <string name="sub_info_time_left_m">剩餘 %1$d 分鐘</string>
 
 </resources>

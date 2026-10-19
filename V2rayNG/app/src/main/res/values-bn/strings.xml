@@ -560,5 +560,16 @@
     <string name="tasker_blurb_stop">%1$s বন্ধ করুন</string>
     <string name="connection_test_empty_message">কোনো বিবরণ পাওয়া যায়নি</string>
     <string name="value_unknown">অজানা</string>
+    <string name="sub_info_open_support">সাপোর্ট লিঙ্ক খুলুন</string>
+    <string name="sub_info_open_page">সাবস্ক্রিপশন তথ্যের পাতা খুলুন</string>
+    <string name="sub_info_unlimited">সীমাহীন</string>
+    <string name="sub_info_traffic_used">ব্যবহৃত %1$s / %2$s</string>
+    <string name="sub_info_traffic_left">বাকি %1$s</string>
+    <string name="sub_info_expires">মেয়াদ শেষ: %1$s</string>
+    <string name="sub_info_no_expiry">মেয়াদের শেষ তারিখ নেই</string>
+    <string name="sub_info_expired">মেয়াদ শেষ</string>
+    <string name="sub_info_time_left_dh">%1$d দিন %2$d ঘণ্টা বাকি</string>
+    <string name="sub_info_time_left_hm">%1$d ঘণ্টা %2$d মিনিট বাকি</string>
+    <string name="sub_info_time_left_m">%1$d মিনিট বাকি</string>
 
 </resources>

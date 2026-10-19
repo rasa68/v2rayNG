@@ -560,5 +560,16 @@
     <string name="tasker_blurb_stop">Stop %1$s</string>
     <string name="connection_test_empty_message">no details available</string>
     <string name="value_unknown">unknown</string>
+    <string name="sub_info_open_support">Open support link</string>
+    <string name="sub_info_open_page">Open subscription page</string>
+    <string name="sub_info_unlimited">Unlimited</string>
+    <string name="sub_info_traffic_used">Used %1$s of %2$s</string>
+    <string name="sub_info_traffic_left">%1$s left</string>
+    <string name="sub_info_expires">Expires %1$s</string>
+    <string name="sub_info_no_expiry">No expiry date</string>
+    <string name="sub_info_expired">Expired</string>
+    <string name="sub_info_time_left_dh">%1$d d %2$d h left</string>
+    <string name="sub_info_time_left_hm">%1$d h %2$d min left</string>
+    <string name="sub_info_time_left_m">%1$d min left</string>
 
 </resources>

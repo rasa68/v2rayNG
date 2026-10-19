@@ -564,5 +564,16 @@
     <string name="tasker_blurb_stop">Остановить %1$s</string>
     <string name="connection_test_empty_message">подробности отсутствуют</string>
     <string name="value_unknown">неизвестно</string>
+    <string name="sub_info_open_support">Открыть ссылку поддержки</string>
+    <string name="sub_info_open_page">Открыть страницу подписки</string>
+    <string name="sub_info_unlimited">Без ограничений</string>
+    <string name="sub_info_traffic_used">Использовано %1$s из %2$s</string>
+    <string name="sub_info_traffic_left">Осталось %1$s</string>
+    <string name="sub_info_expires">Истекает %1$s</string>
+    <string name="sub_info_no_expiry">Без срока действия</string>
+    <string name="sub_info_expired">Срок истёк</string>
+    <string name="sub_info_time_left_dh">Осталось %1$d д %2$d ч</string>
+    <string name="sub_info_time_left_hm">Осталось %1$d ч %2$d мин</string>
+    <string name="sub_info_time_left_m">Осталось %1$d мин</string>
 
 </resources>

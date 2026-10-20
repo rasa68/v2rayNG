@@ -26,18 +26,23 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -48,6 +53,7 @@ import kotlinx.coroutines.flow.StateFlow
 private val TAB_BAR_PADDING = 3.dp
 private val TAB_SPACING = 2.dp
 private val TAB_HEIGHT = 30.dp
+private val SELECTED_TAB_MARGIN = 12.dp
 
 /**
  * Subscription group tabs: a floating rounded bar whose selected tab is a tinted pill and whose
@@ -163,15 +169,24 @@ private fun GroupTabItem(
     val count = if (group.id.isEmpty()) 0 else servers.size
     val colors = MaterialTheme.colorScheme
     val bringIntoView = remember { BringIntoViewRequester() }
+    var size by remember { mutableStateOf(IntSize.Zero) }
+    val marginPx = with(LocalDensity.current) { SELECTED_TAB_MARGIN.toPx() }
 
-    LaunchedEffect(selected) {
-        if (selected) bringIntoView.bringIntoView()
+    // Bring the tab in with some room around it so the pill never ends up flush against the bar's
+    // rounded edge; at the first and last tab the scroll stops at the bar's own inner padding.
+    LaunchedEffect(selected, size) {
+        if (selected && size != IntSize.Zero) {
+            bringIntoView.bringIntoView(
+                Rect(-marginPx, 0f, size.width + marginPx, size.height.toFloat())
+            )
+        }
     }
 
     // One selectable node: name, count and selected state are announced together.
     Row(
         modifier = Modifier
             .bringIntoViewRequester(bringIntoView)
+            .onSizeChanged { size = it }
             .clip(CircleShape)
             .background(if (selected) colors.primary.copy(alpha = 0.12f) else Color.Transparent)
             .selectable(selected = selected, role = Role.Tab, onClick = onClick)

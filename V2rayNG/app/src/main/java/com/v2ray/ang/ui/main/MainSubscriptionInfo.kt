@@ -36,7 +36,7 @@ import com.v2ray.ang.util.Utils
 
 private const val MILLIS_PER_SECOND = 1000L
 private const val EXPIRY_DATE_PATTERN = "yyyy-MM-dd"
-private const val CARD_ALPHA = 0.85f
+private const val CARD_ALPHA = 0.97f
 
 /** Locale-neutral values the subscription information box renders. */
 internal data class SubscriptionInfoUiModel(
@@ -96,7 +96,7 @@ internal fun SubscriptionInfoCard(
             .fillMaxWidth()
             .padding(horizontal = 12.dp, vertical = 4.dp),
         shape = MaterialTheme.shapes.medium,
-        // Slightly see-through: the list scrolls underneath and shows through faintly.
+        // Almost opaque: the list scrolls underneath without showing through readably.
         color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = CARD_ALPHA),
         border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
     ) {

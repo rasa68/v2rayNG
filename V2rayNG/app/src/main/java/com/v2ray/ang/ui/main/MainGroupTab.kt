@@ -30,6 +30,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.v2ray.ang.dto.GroupMapItem
 import com.v2ray.ang.dto.entities.ServersCache
@@ -62,15 +63,15 @@ fun GroupTabBar(
     Surface(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 12.dp, vertical = 8.dp),
+            .padding(horizontal = 12.dp, vertical = 6.dp),
         shape = CircleShape,
         color = MaterialTheme.colorScheme.surface,
         shadowElevation = 3.dp
     ) {
         LazyRow(
             state = listState,
-            contentPadding = PaddingValues(horizontal = 4.dp, vertical = 4.dp),
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            contentPadding = PaddingValues(horizontal = 3.dp, vertical = 3.dp),
+            horizontalArrangement = Arrangement.spacedBy(2.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             itemsIndexed(groups, key = { _, group -> group.id }) { index, group ->
@@ -103,16 +104,16 @@ private fun GroupTabItem(
     // One selectable node: name, count and selected state are announced together.
     Row(
         modifier = Modifier
-            .height(40.dp)
+            .height(30.dp)
             .clip(CircleShape)
             .background(if (selected) colors.primary.copy(alpha = 0.12f) else colors.surface)
             .selectable(selected = selected, role = Role.Tab, onClick = onClick)
-            .padding(horizontal = 16.dp),
+            .padding(horizontal = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
             text = group.remarks,
-            style = MaterialTheme.typography.bodyLarge,
+            style = MaterialTheme.typography.bodySmall,
             fontWeight = FontWeight.Medium,
             color = if (selected) colors.primary else colors.onSurfaceVariant,
             maxLines = 1,
@@ -120,18 +121,18 @@ private fun GroupTabItem(
             overflow = TextOverflow.Ellipsis
         )
         if (count > 0) {
-            Spacer(Modifier.width(6.dp))
+            Spacer(Modifier.width(3.dp))
             Box(
                 modifier = Modifier
-                    .defaultMinSize(minWidth = 20.dp, minHeight = 20.dp)
+                    .defaultMinSize(minWidth = 16.dp, minHeight = 16.dp)
                     .clip(CircleShape)
                     .background(if (selected) colors.primary else colors.onSurfaceVariant.copy(alpha = 0.55f))
-                    .padding(horizontal = 6.dp),
+                    .padding(horizontal = 4.dp),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = count.toString(),
-                    style = MaterialTheme.typography.labelSmall,
+                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp, lineHeight = 12.sp),
                     color = if (selected) colors.onPrimary else colors.surface,
                     maxLines = 1
                 )

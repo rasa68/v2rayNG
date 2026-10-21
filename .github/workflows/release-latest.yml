@@ -177,5 +177,5 @@ jobs:
           gh release create "v$VERSION" files/*.apk \
             --target "${{ github.sha }}" \
             --title "rasa $VERSION" \
-            --notes "${NOTES:-rasa $VERSION. Signed with the fork's release key, so it installs over the previous rasa build as an update.}" \
+            --notes "${NOTES:-rasa $VERSION. Signed with the rasa release key, so it installs over the previous rasa build as an update.}" \
             --latest

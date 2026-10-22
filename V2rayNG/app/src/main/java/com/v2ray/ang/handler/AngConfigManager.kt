@@ -546,11 +546,12 @@ object AngConfigManager {
                 it.subscription.lastUpdated = System.currentTimeMillis()
                 // Replaced on every successful update so the box disappears if the panel stops sending the headers.
                 it.subscription.usageInfo = usageInfo
-                // The panel is the source of truth for the refresh schedule: when it publishes an
-                // interval, turn auto-update on with that interval. Without the header the user's
-                // own settings stay untouched.
+                // Opt-in (Advanced Settings): when enabled and the panel publishes an interval, turn
+                // auto-update on with that interval. Otherwise the user's own settings stay untouched.
                 var scheduleChanged = false
-                panelIntervalMinutes?.let { minutes ->
+                panelIntervalMinutes?.takeIf {
+                    MmkvManager.decodeSettingsBool(AppConfig.PREF_SUB_PANEL_INTERVAL, false)
+                }?.let { minutes ->
                     scheduleChanged = !it.subscription.autoUpdate || it.subscription.updateInterval != minutes
                     it.subscription.autoUpdate = true
                     it.subscription.updateInterval = minutes

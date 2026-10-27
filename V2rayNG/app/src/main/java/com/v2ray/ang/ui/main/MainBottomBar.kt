@@ -29,6 +29,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -39,6 +40,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.lerp
 import com.v2ray.ang.R
 import com.v2ray.ang.ui.compose.colorFabActive
 import com.v2ray.ang.ui.compose.colorFabInactiveDark
@@ -63,7 +65,8 @@ fun MainBottomBar(
     displayText: String,
     isRunning: Boolean,
     isDarkTheme: Boolean,
-    onAction: (MainAction) -> Unit
+    onAction: (MainAction) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val scope = rememberCoroutineScope()
     val rotationAnim = remember { Animatable(0f) }
@@ -91,10 +94,10 @@ fun MainBottomBar(
     )
 
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .windowInsetsPadding(WindowInsets.navigationBars)
-            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 14.dp)
     ) {
         BoxWithConstraints(
             modifier = Modifier
@@ -110,16 +113,28 @@ fun MainBottomBar(
                     .background(MaterialTheme.colorScheme.surfaceContainerHigh)
                     .clickable(onClick = { onAction(MainAction.TestCurrentServer) })
             )
-            Text(
-                text = displayText,
-                style = MaterialTheme.typography.bodyMedium,
-                textAlign = TextAlign.Center,
+            // Disconnected the message is centered on the track; connected it moves to the start side
+            // (left in LTR, right in RTL) next to the knob, which is then at the end.
+            Box(
                 modifier = Modifier
-                    .align(Alignment.Center)
-                    // Room for the knob on either side keeps the message clear of it in both positions.
-                    .padding(horizontal = KNOB_SIZE + 8.dp, vertical = 8.dp)
-                    .semantics { contentDescription = displayText }
-            )
+                    .fillMaxWidth()
+                    .padding(
+                        start = lerp(KNOB_SIZE + 8.dp, 20.dp, progress),
+                        end = KNOB_SIZE + 8.dp,
+                        top = 8.dp,
+                        bottom = 8.dp
+                    )
+            ) {
+                Text(
+                    text = displayText,
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = if (progress > 0.5f) TextAlign.Start else TextAlign.Center,
+                    // BiasAlignment mirrors in RTL: -1 is the start edge in both directions.
+                    modifier = Modifier
+                        .align(BiasAlignment(horizontalBias = -progress, verticalBias = 0f))
+                        .semantics { contentDescription = displayText }
+                )
+            }
             val travel = (maxWidth - KNOB_SIZE).coerceAtLeast(0.dp)
             FloatingActionButton(
                 onClick = {

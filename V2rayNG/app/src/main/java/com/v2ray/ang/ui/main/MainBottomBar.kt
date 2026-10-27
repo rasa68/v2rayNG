@@ -1,46 +1,64 @@
 package com.v2ray.ang.ui.main
 
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.matchParentSize
 import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.v2ray.ang.R
-import com.v2ray.ang.ui.compose.AppDivider
 import com.v2ray.ang.ui.compose.colorFabActive
 import com.v2ray.ang.ui.compose.colorFabInactiveDark
 import com.v2ray.ang.ui.compose.colorFabInactiveLight
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+private val KNOB_SIZE = 56.dp
+private const val KNOB_SLIDE_MILLIS = 500
+
+/** How long the knob stays where the user sent it while the service has not confirmed the change. */
+private const val KNOB_PENDING_TIMEOUT_MILLIS = 6_000L
+
+/**
+ * Connection status bar: a rounded track with the status message in the middle and the round
+ * connect button as a knob. The knob rests at the start edge while disconnected and slides to the
+ * end edge when the connection is turned on (mirrored in right-to-left languages). Tapping the
+ * track still tests the current server.
+ */
 @Composable
 fun MainBottomBar(
     displayText: String,
@@ -50,71 +68,94 @@ fun MainBottomBar(
 ) {
     val scope = rememberCoroutineScope()
     val rotationAnim = remember { Animatable(0f) }
+    // Where the user just sent the knob, until the service confirms (or the wait times out).
+    var pendingRunning by remember { mutableStateOf<Boolean?>(null) }
+    val knobAtEnd = pendingRunning ?: isRunning
 
     LaunchedEffect(isRunning) {
+        pendingRunning = null
         if (!isRunning) {
             rotationAnim.snapTo(0f)
         }
     }
+    LaunchedEffect(pendingRunning) {
+        if (pendingRunning != null) {
+            delay(KNOB_PENDING_TIMEOUT_MILLIS)
+            pendingRunning = null
+        }
+    }
 
-    Box(modifier = Modifier.fillMaxWidth()) {
-        Column(
+    val progress by animateFloatAsState(
+        targetValue = if (knobAtEnd) 1f else 0f,
+        animationSpec = tween(durationMillis = KNOB_SLIDE_MILLIS, easing = FastOutSlowInEasing),
+        label = "connectKnob"
+    )
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .windowInsetsPadding(WindowInsets.navigationBars)
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+    ) {
+        BoxWithConstraints(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.surface)
-                .clickable(onClick = { onAction(MainAction.TestCurrentServer) })
-                .windowInsetsPadding(WindowInsets.navigationBars)
+                .heightIn(min = KNOB_SIZE),
+            contentAlignment = Alignment.CenterStart
         ) {
-            AppDivider()
-            Row(
+            // The clipped layer is separate from the knob so the button's shadow is never cut off.
+            Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(64.dp)
-                    .padding(horizontal = 16.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = displayText,
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.semantics {
-                        contentDescription = displayText
+                    .matchParentSize()
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                    .clickable(onClick = { onAction(MainAction.TestCurrentServer) })
+            )
+            Text(
+                text = displayText,
+                style = MaterialTheme.typography.bodyMedium,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    // Room for the knob on either side keeps the message clear of it in both positions.
+                    .padding(horizontal = KNOB_SIZE + 8.dp, vertical = 8.dp)
+                    .semantics { contentDescription = displayText }
+            )
+            val travel = (maxWidth - KNOB_SIZE).coerceAtLeast(0.dp)
+            FloatingActionButton(
+                onClick = {
+                    if (!isRunning) {
+                        scope.launch {
+                            rotationAnim.animateTo(
+                                targetValue = 720f,
+                                animationSpec = tween(durationMillis = 3000)
+                            )
+                        }
                     }
+                    pendingRunning = !knobAtEnd
+                    onAction(MainAction.ToggleService)
+                },
+                // offset() follows the layout direction, so the knob travels start -> end in LTR and RTL.
+                modifier = Modifier
+                    .offset(x = travel * progress)
+                    .size(KNOB_SIZE),
+                shape = CircleShape,
+                containerColor = if (isRunning) colorFabActive
+                else if (isDarkTheme) colorFabInactiveDark
+                else colorFabInactiveLight
+            ) {
+                Icon(
+                    painter = if (isRunning) painterResource(R.drawable.ic_stop_24dp)
+                    else painterResource(R.drawable.ic_play_24dp),
+                    contentDescription = stringResource(
+                        if (isRunning) R.string.acc_stop else R.string.acc_start
+                    ),
+                    tint = Color.White,
+                    modifier = Modifier
+                        .size(24.dp)
+                        .graphicsLayer { rotationZ = rotationAnim.value }
                 )
             }
-        }
-        FloatingActionButton(
-            onClick = {
-                if (!isRunning) {
-                    scope.launch {
-                        rotationAnim.animateTo(
-                            targetValue = 720f,
-                            animationSpec = tween(durationMillis = 3000)
-                        )
-                    }
-                }
-                onAction(MainAction.ToggleService)
-            },
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .padding(end = 24.dp)
-                .offset(y = (-28).dp)
-                .navigationBarsPadding(),
-            containerColor = if (isRunning) colorFabActive
-            else if (isDarkTheme) colorFabInactiveDark
-            else colorFabInactiveLight
-        ) {
-            Icon(
-                painter = if (isRunning) painterResource(R.drawable.ic_stop_24dp)
-                else painterResource(R.drawable.ic_play_24dp),
-                contentDescription = stringResource(
-                    if (isRunning) R.string.acc_stop else R.string.acc_start
-                ),
-                tint = Color.White,
-                modifier = Modifier
-                    .size(24.dp)
-                    .graphicsLayer { rotationZ = rotationAnim.value }
-            )
         }
     }
 }

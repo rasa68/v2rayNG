@@ -24,6 +24,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -32,15 +33,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.lerp
+import androidx.compose.ui.unit.sp
 import com.v2ray.ang.R
 import com.v2ray.ang.ui.compose.colorFabActive
 import com.v2ray.ang.ui.compose.colorFabInactiveDark
@@ -50,6 +55,9 @@ import kotlinx.coroutines.launch
 
 private val KNOB_SIZE = 56.dp
 private const val KNOB_SLIDE_MILLIS = 500
+private const val TEXT_MAX_SP = 14f
+private const val TEXT_MIN_SP = 10f
+private const val TEXT_LINE_HEIGHT_FACTOR = 1.3f
 
 /** How long the knob stays where the user sent it while the service has not confirmed the change. */
 private const val KNOB_PENDING_TIMEOUT_MILLIS = 6_000L
@@ -109,6 +117,7 @@ fun MainBottomBar(
             Box(
                 modifier = Modifier
                     .matchParentSize()
+                    .shadow(elevation = 3.dp, shape = CircleShape)
                     .clip(CircleShape)
                     .background(MaterialTheme.colorScheme.surfaceContainerHigh)
                     .clickable(onClick = { onAction(MainAction.TestCurrentServer) })
@@ -125,10 +134,28 @@ fun MainBottomBar(
                         bottom = 8.dp
                     )
             ) {
+                // Whatever the language, the message takes at most two lines of a fixed line height, shrinking the
+                // font if needed, so the bar keeps the same height when the status text changes (for example after
+                // a ping test, whose result is longer in some languages).
+                var fontSizeSp by remember(displayText) { mutableFloatStateOf(TEXT_MAX_SP) }
                 Text(
                     text = displayText,
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        fontSize = fontSizeSp.sp,
+                        lineHeight = (fontSizeSp * TEXT_LINE_HEIGHT_FACTOR).sp,
+                        lineHeightStyle = LineHeightStyle(
+                            alignment = LineHeightStyle.Alignment.Center,
+                            trim = LineHeightStyle.Trim.None
+                        )
+                    ),
                     textAlign = if (progress > 0.5f) TextAlign.Start else TextAlign.Center,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    onTextLayout = { layout ->
+                        if (layout.hasVisualOverflow && fontSizeSp > TEXT_MIN_SP) {
+                            fontSizeSp = (fontSizeSp - 1f).coerceAtLeast(TEXT_MIN_SP)
+                        }
+                    },
                     // BiasAlignment mirrors in RTL: -1 is the start edge in both directions.
                     modifier = Modifier
                         .align(BiasAlignment(horizontalBias = -progress, verticalBias = 0f))

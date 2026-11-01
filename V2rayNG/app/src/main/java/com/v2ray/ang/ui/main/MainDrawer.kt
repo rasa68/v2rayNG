@@ -2,19 +2,24 @@ package com.v2ray.ang.ui.main
 
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -24,19 +29,17 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.v2ray.ang.BuildConfig
 import com.v2ray.ang.R
 import com.v2ray.ang.ui.compose.AppDivider
 import com.v2ray.ang.ui.compose.verticalScrollbar
@@ -54,15 +57,16 @@ enum class MainDestination(@DrawableRes val iconRes: Int, @StringRes val labelRe
     About(R.drawable.ic_about_24dp, R.string.title_about)
 }
 
-private val primaryDrawerItems = listOf(
+/** Shown as round buttons with a label below, like the quick actions of Galaxy Store's menu. */
+private val quickActionItems = listOf(
     MainDestination.Subscriptions,
     MainDestination.PerAppProxy,
     MainDestination.Routing,
-    MainDestination.UserAssets,
-    MainDestination.Settings
+    MainDestination.UserAssets
 )
 
-private val drawerItems = primaryDrawerItems + listOf(
+/** Shown as full-width rows below the quick actions. */
+private val listItems = listOf(
     MainDestination.Promotion,
     MainDestination.Logcat,
     MainDestination.CheckUpdate,
@@ -71,27 +75,15 @@ private val drawerItems = primaryDrawerItems + listOf(
 )
 
 /**
- * Full-screen menu: a back arrow and the app name with its version on top, then the destinations in
- * two groups separated by a divider. The arrow closes the menu and returns to the config lists.
+ * Full-screen menu laid out like Galaxy Store's: a header with the back arrow, the app name and the
+ * settings gear at the end; a row of round quick-action buttons with their labels below; a divider;
+ * then the remaining destinations as rows. The arrow closes the menu and returns to the config lists.
  */
 @Composable
 fun MainDrawerContent(onClose: () -> Unit, onNavigate: (MainDestination) -> Unit) {
     val scrollState = rememberScrollState()
     val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
     val colors = MaterialTheme.colorScheme
-    // The trailing LRM keeps the closing parenthesis on the right side of the version in RTL languages.
-    val title = buildAnnotatedString {
-        append(stringResource(R.string.app_name))
-        withStyle(
-            SpanStyle(
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Normal,
-                color = colors.onSurfaceVariant
-            )
-        ) {
-            append(" (${BuildConfig.VERSION_NAME})\u200E")
-        }
-    }
 
     Surface(modifier = Modifier.fillMaxSize(), color = colors.surface) {
         Column(
@@ -102,7 +94,7 @@ fun MainDrawerContent(onClose: () -> Unit, onNavigate: (MainDestination) -> Unit
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = 8.dp, end = 16.dp, top = 8.dp, bottom = 8.dp),
+                    .padding(start = 8.dp, end = 8.dp, top = 8.dp, bottom = 8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(onClick = onClose) {
@@ -115,25 +107,43 @@ fun MainDrawerContent(onClose: () -> Unit, onNavigate: (MainDestination) -> Unit
                 }
                 Spacer(Modifier.width(8.dp))
                 Text(
-                    text = title,
-                    style = MaterialTheme.typography.headlineSmall,
+                    text = stringResource(R.string.app_name),
+                    modifier = Modifier.weight(1f),
+                    style = MaterialTheme.typography.headlineMedium,
                     fontWeight = FontWeight.Bold,
                     color = colors.onSurface,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
+                IconButton(onClick = { onNavigate(MainDestination.Settings) }) {
+                    Icon(
+                        painter = painterResource(MainDestination.Settings.iconRes),
+                        contentDescription = stringResource(MainDestination.Settings.labelRes)
+                    )
+                }
             }
-            AppDivider(Modifier.padding(horizontal = 16.dp))
             Column(
                 modifier = Modifier
                     .weight(1f)
                     .verticalScroll(scrollState)
                     .verticalScrollbar(scrollState)
             ) {
-                drawerItems.forEachIndexed { index, item ->
-                    if (index == primaryDrawerItems.size) {
-                        AppDivider(Modifier.padding(horizontal = 16.dp, vertical = 4.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 8.dp, vertical = 16.dp),
+                    verticalAlignment = Alignment.Top
+                ) {
+                    quickActionItems.forEach { item ->
+                        QuickAction(
+                            item = item,
+                            onClick = { onNavigate(item) },
+                            modifier = Modifier.weight(1f)
+                        )
                     }
+                }
+                AppDivider(Modifier.padding(horizontal = 16.dp))
+                listItems.forEach { item ->
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -157,5 +167,42 @@ fun MainDrawerContent(onClose: () -> Unit, onNavigate: (MainDestination) -> Unit
                 }
             }
         }
+    }
+}
+
+/** A round gray button with its icon and the destination's name below, centered in its share of the row. */
+@Composable
+private fun QuickAction(item: MainDestination, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    val colors = MaterialTheme.colorScheme
+    Column(
+        modifier = modifier
+            .clip(RoundedCornerShape(16.dp))
+            .clickable(role = Role.Button, onClick = onClick)
+            .padding(horizontal = 4.dp, vertical = 4.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Box(
+            modifier = Modifier
+                .size(56.dp)
+                .clip(CircleShape)
+                .background(colors.surfaceContainerHigh),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                painter = painterResource(item.iconRes),
+                contentDescription = null,
+                modifier = Modifier.size(24.dp),
+                tint = colors.onSurface
+            )
+        }
+        Spacer(Modifier.height(8.dp))
+        Text(
+            text = stringResource(item.labelRes),
+            style = MaterialTheme.typography.bodyMedium,
+            color = colors.onSurface,
+            textAlign = TextAlign.Center,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis
+        )
     }
 }

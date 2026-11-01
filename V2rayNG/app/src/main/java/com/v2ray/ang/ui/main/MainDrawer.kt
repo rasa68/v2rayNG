@@ -2,36 +2,43 @@ package com.v2ray.ang.ui.main
 
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.DrawerState
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalDrawerSheet
-import androidx.compose.material3.NavigationDrawerItem
-import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.BlendMode
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.v2ray.ang.BuildConfig
 import com.v2ray.ang.R
 import com.v2ray.ang.ui.compose.AppDivider
-import com.v2ray.ang.ui.compose.LocalDarkTheme
 import com.v2ray.ang.ui.compose.verticalScrollbar
 
 enum class MainDestination(@DrawableRes val iconRes: Int, @StringRes val labelRes: Int) {
@@ -63,59 +70,91 @@ private val drawerItems = primaryDrawerItems + listOf(
     MainDestination.About
 )
 
+/**
+ * Full-screen menu: a back arrow and the app name with its version on top, then the destinations in
+ * two groups separated by a divider. The arrow closes the menu and returns to the config lists.
+ */
 @Composable
-fun MainDrawerContent(drawerState: DrawerState, onNavigate: (MainDestination) -> Unit) {
-    val drawerScrollState = rememberScrollState()
+fun MainDrawerContent(onClose: () -> Unit, onNavigate: (MainDestination) -> Unit) {
+    val scrollState = rememberScrollState()
+    val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
+    val colors = MaterialTheme.colorScheme
+    // The trailing LRM keeps the closing parenthesis on the right side of the version in RTL languages.
+    val title = buildAnnotatedString {
+        append(stringResource(R.string.app_name))
+        withStyle(
+            SpanStyle(
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Normal,
+                color = colors.onSurfaceVariant
+            )
+        ) {
+            append(" (${BuildConfig.VERSION_NAME})\u200E")
+        }
+    }
 
-    ModalDrawerSheet(
-        drawerState = drawerState,
-        modifier = Modifier.fillMaxWidth(0.75f),
-        drawerContainerColor = MaterialTheme.colorScheme.surface
-    ) {
+    Surface(modifier = Modifier.fillMaxSize(), color = colors.surface) {
         Column(
             modifier = Modifier
-                .verticalScroll(drawerScrollState)
-                .verticalScrollbar(drawerScrollState)
+                .fillMaxSize()
+                .windowInsetsPadding(WindowInsets.systemBars)
         ) {
-            Surface(
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(180.dp)
+                    .padding(start = 8.dp, end = 16.dp, top = 8.dp, bottom = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    val isDarkTheme = LocalDarkTheme.current
-                    Image(
-                        painter = painterResource(R.mipmap.ic_launcher_foreground),
-                        contentDescription = null,
-                        modifier = Modifier.size(120.dp),
-                        colorFilter = if (isDarkTheme) {
-                            ColorFilter.tint(Color.White, BlendMode.SrcIn)
-                        } else {
-                            null
-                        }
-                    )
-                    Text(
-                        text = stringResource(R.string.app_name),
-                        style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.onSurface
+                IconButton(onClick = onClose) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_arrow_back_24dp),
+                        contentDescription = stringResource(R.string.acc_back),
+                        // The drawable is not auto-mirrored: point it the other way in RTL.
+                        modifier = Modifier.graphicsLayer { scaleX = if (isRtl) -1f else 1f }
                     )
                 }
-            }
-            drawerItems.forEachIndexed { index, item ->
-                if (index == primaryDrawerItems.size) AppDivider()
-                NavigationDrawerItem(
-                    label = { Text(stringResource(item.labelRes)) },
-                    selected = false,
-                    onClick = { onNavigate(item) },
-                    icon = { Icon(painterResource(item.iconRes), contentDescription = null) },
-                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                Spacer(Modifier.width(8.dp))
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = colors.onSurface,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
+            }
+            AppDivider(Modifier.padding(horizontal = 16.dp))
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .verticalScroll(scrollState)
+                    .verticalScrollbar(scrollState)
+            ) {
+                drawerItems.forEachIndexed { index, item ->
+                    if (index == primaryDrawerItems.size) {
+                        AppDivider(Modifier.padding(horizontal = 16.dp, vertical = 4.dp))
+                    }
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onNavigate(item) }
+                            .padding(horizontal = 24.dp, vertical = 18.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            painter = painterResource(item.iconRes),
+                            contentDescription = null,
+                            modifier = Modifier.size(24.dp),
+                            tint = colors.onSurface
+                        )
+                        Spacer(Modifier.width(24.dp))
+                        Text(
+                            text = stringResource(item.labelRes),
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = colors.onSurface
+                        )
+                    }
+                }
             }
         }
     }

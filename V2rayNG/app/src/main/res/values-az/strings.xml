@@ -566,5 +566,9 @@
     <string name="sub_info_unlimited">Limitsiz</string>
     <string name="title_pref_sub_panel_interval">Avtomatik yeniləmə intervalını qəbul et</string>
     <string name="summary_pref_sub_panel_interval">Aktiv edildikdə abunəliyin avtomatik yenilənməsini və intervalını abunəlik təminatçısı təyin edir. Deaktiv olduqda hər şey əvvəlki kimi qalır və əl ilə təyin edilir.</string>
+    <string name="update_later">Sonra</string>
+    <string name="update_downloading">Yeniləmə yüklənir</string>
+    <string name="update_download_failed">Yükləmə alınmadı. Bağlantını yoxlayıb yenidən cəhd et.</string>
+    <string name="update_saved_in_downloads">Yeni versiya Yükləmələr qovluğunda saxlanıldı (%1$s). Quraşdırmaq üçün faylı oradan açın.</string>
 
 </resources>

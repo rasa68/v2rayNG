@@ -570,5 +570,6 @@
     <string name="update_downloading">Yeniləmə yüklənir</string>
     <string name="update_download_failed">Yükləmə alınmadı. Bağlantını yoxlayıb yenidən cəhd et.</string>
     <string name="update_saved_in_downloads">Yeni versiya Yükləmələr qovluğunda saxlanıldı (%1$s). Quraşdırmaq üçün faylı oradan açın.</string>
+    <string name="connection_test_checking_ip">IP yoxlanılır…</string>
 
 </resources>

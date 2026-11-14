@@ -13,6 +13,8 @@ internal class MainTestRequests {
 
     fun beginCurrent(): String = UUID.randomUUID().toString().also { current = it }
 
+    fun isCurrent(id: String): Boolean = id == current
+
     fun completeCurrent(id: String): Boolean {
         if (id != current) return false
         current = null

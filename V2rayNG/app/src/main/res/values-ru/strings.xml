@@ -573,5 +573,6 @@
     <string name="update_downloading">Загрузка обновления</string>
     <string name="update_download_failed">Не удалось загрузить. Проверьте соединение и повторите попытку.</string>
     <string name="update_saved_in_downloads">Новая версия сохранена в папке «Загрузки» (%1$s). Откройте файл оттуда, чтобы установить.</string>
+    <string name="connection_test_checking_ip">Проверка IP…</string>
 
 </resources>

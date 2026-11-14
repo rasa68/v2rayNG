@@ -147,7 +147,15 @@ class MainViewModel(
 
             MainServiceEvent.StateStopSuccess -> updateRunningState(false)
             is MainServiceEvent.MeasureDelayResult -> {
-                if (!uiState.value.isRunning || !testRequests.completeCurrent(event.requestId)) return
+                if (!uiState.value.isRunning) return
+                if (event.result.ipPending) {
+                    // The delay is known but the IP lookup is still running: show the delay now and keep the
+                    // request open for the final result.
+                    if (!testRequests.isCurrent(event.requestId)) return
+                    _uiState.update { it.copy(status = MainStatus.ConnectionTest(event.result)) }
+                    return
+                }
+                if (!testRequests.completeCurrent(event.requestId)) return
                 _uiState.update { it.copy(isTesting = testRequests.isTesting, status = MainStatus.ConnectionTest(event.result)) }
             }
 
@@ -243,9 +251,14 @@ class MainViewModel(
             dataSource.getString(R.string.connection_test_error, detail)
         }
 
-        if (result.delayMillis < 0 || (result.country == null && result.ipAddress == null)) {
-            return status
+        if (result.delayMillis < 0) return status
+
+        // While the IP is still being looked up the second line is already there ("Checking IP…"), so the
+        // text does not jump from one line to two when the address arrives.
+        if (result.ipPending) {
+            return "$status\n${dataSource.getString(R.string.connection_test_checking_ip)}"
         }
+        if (result.country == null && result.ipAddress == null) return status
 
         val unknown = dataSource.getString(R.string.value_unknown)
         return "$status\n(${result.country ?: unknown}) ${result.ipAddress ?: unknown}"

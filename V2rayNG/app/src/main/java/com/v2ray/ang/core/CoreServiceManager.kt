@@ -345,19 +345,26 @@ object CoreServiceManager {
             }
 
             ensureActive()
-            val endpoint = if (time >= 0) SpeedtestManager.getRemoteIPInfo() else null
-            val result = ConnectionTestResult(
-                delayMillis = time,
-                errorMessage = errorStr,
-                country = endpoint?.country,
-                ipAddress = endpoint?.ipAddress,
-            )
-            withContext(Dispatchers.Main.immediate) {
-                if (isRunning()) {
-                    MessageHelper.sendMsg2UI(service, AppConfig.MSG_MEASURE_DELAY_RESULT, result, requestId)
-                } else {
-                    MessageHelper.sendMsg2UI(service, AppConfig.MSG_MEASURE_DELAY_CANCEL, "", requestId)
-                }
+            // First result: the delay as soon as it is known; the UI already shows "Checking IP…" for the
+            // second line. When the delay failed there is no IP lookup and this is the final result.
+            val lookupIp = time >= 0
+            if (!sendDelayResult(service, requestId, ConnectionTestResult(time, errorStr, ipPending = lookupIp))) {
+                return@launch
+            }
+
+            if (lookupIp) {
+                val endpoint = SpeedtestManager.getRemoteIPInfo()
+                ensureActive()
+                sendDelayResult(
+                    service,
+                    requestId,
+                    ConnectionTestResult(
+                        delayMillis = time,
+                        errorMessage = errorStr,
+                        country = endpoint?.country,
+                        ipAddress = endpoint?.ipAddress,
+                    )
+                )
             }
         }.invokeOnCompletion { cause ->
             if (cause is CancellationException) {
@@ -365,6 +372,22 @@ object CoreServiceManager {
             }
         }
     }
+
+    /**
+     * Sends a connection test [result] to the UI, or a cancel message when the core is no longer running.
+     *
+     * @return true when the result was sent.
+     */
+    private suspend fun sendDelayResult(service: Service, requestId: String, result: ConnectionTestResult): Boolean =
+        withContext(Dispatchers.Main.immediate) {
+            if (isRunning()) {
+                MessageHelper.sendMsg2UI(service, AppConfig.MSG_MEASURE_DELAY_RESULT, result, requestId)
+                true
+            } else {
+                MessageHelper.sendMsg2UI(service, AppConfig.MSG_MEASURE_DELAY_CANCEL, "", requestId)
+                false
+            }
+        }
 
     /**
      * Gets the current service instance.

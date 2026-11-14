@@ -8,4 +8,6 @@ data class ConnectionTestResult(
     val errorMessage: String = "",
     val country: String? = null,
     val ipAddress: String? = null,
+    /** True on the first result, sent as soon as the delay is known while the IP lookup is still running. */
+    val ipPending: Boolean = false,
 ) : Serializable

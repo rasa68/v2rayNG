@@ -577,5 +577,6 @@
     <string name="update_downloading">جارٍ تنزيل التحديث</string>
     <string name="update_download_failed">فشل التنزيل. تحقق من اتصالك وحاول مرة أخرى.</string>
     <string name="update_saved_in_downloads">تم حفظ الإصدار الجديد في مجلد التنزيلات (%1$s). افتح الملف من هناك لتثبيته.</string>
+    <string name="connection_test_checking_ip">جارٍ فحص عنوان IP…</string>
 
 </resources>

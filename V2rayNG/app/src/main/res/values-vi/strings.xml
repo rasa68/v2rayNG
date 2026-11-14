@@ -567,5 +567,6 @@
     <string name="update_downloading">Đang tải bản cập nhật</string>
     <string name="update_download_failed">Tải xuống thất bại. Hãy kiểm tra kết nối và thử lại.</string>
     <string name="update_saved_in_downloads">Phiên bản mới đã được lưu trong thư mục Tải xuống (%1$s). Hãy mở tệp từ đó để cài đặt.</string>
+    <string name="connection_test_checking_ip">Đang kiểm tra IP…</string>
 
 </resources>

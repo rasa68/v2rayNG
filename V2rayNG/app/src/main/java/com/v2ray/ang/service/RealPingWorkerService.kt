@@ -10,11 +10,13 @@ import com.v2ray.ang.extension.isNotNullEmpty
 import com.v2ray.ang.handler.MmkvManager
 import com.v2ray.ang.handler.SettingsManager
 import com.v2ray.ang.handler.SpeedtestManager
+import com.v2ray.ang.util.JsonUtil
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.asCoroutineDispatcher
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
@@ -22,6 +24,8 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicInteger
+
+private const val TCP_PRECHECK_TIMEOUT_MS = 3000
 
 internal object RealPingExecutionLimiter {
     private val customConfigMutex = Mutex()
@@ -108,6 +112,11 @@ class RealPingWorkerService(
         val retFailure = -1L
 
         val config = MmkvManager.decodeServerConfig(guid) ?: return retFailure
+        val configResult = CoreConfigManager.getV2rayConfig4Speedtest(context, guid)
+        if (!configResult.status) {
+            return retFailure
+        }
+
         if (!config.configType.isComplexType()
             && config.configType != EConfigType.HYSTERIA2
             && config.configType != EConfigType.WIREGUARD
@@ -115,20 +124,40 @@ class RealPingWorkerService(
             && config.server.isNotNullEmpty()
             && config.serverPort?.toIntOrNull() != null
         ) {
-            val url = config.server.orEmpty()
+            val server = config.server.orEmpty()
             val port = config.serverPort.orEmpty().toInt()
-            val tcpTime = SpeedtestManager.socketConnectTime(url, port, 1000)
+            // Connect to the same address the real connection uses (the pre-resolved one), not to whatever the
+            // system resolver returns for the domain.
+            val host = resolvedServerAddress(configResult.content, server) ?: server
+            val tcpTime = SpeedtestManager.socketConnectTime(host, port, TCP_PRECHECK_TIMEOUT_MS)
             if (tcpTime <= -1L) {
                 return retFailure
             }
         }
 
-        val configResult = CoreConfigManager.getV2rayConfig4Speedtest(context, guid)
-        if (!configResult.status) {
-            return retFailure
-        }
+        val callerContext = currentCoroutineContext()
         return RealPingExecutionLimiter.run(config.configType) {
-            CoreNativeManager.measureOutboundDelay(configResult.content, SettingsManager.getDelayTestUrl())
+            var delay = CoreNativeManager.measureOutboundDelay(configResult.content, SettingsManager.getDelayTestUrl())
+            // Like the connection test on the running core: when the first URL fails, try the second one.
+            if (delay < 0 && callerContext.isActive) {
+                delay = CoreNativeManager.measureOutboundDelay(configResult.content, SettingsManager.getDelayTestUrl(true))
+            }
+            delay
+        }
+    }
+
+    /** The pre-resolved address of [server] in the test config's DNS hosts, if the config has one. */
+    private fun resolvedServerAddress(configJson: String, server: String): String? {
+        val hosts = JsonUtil.parseString(configJson)
+            ?.takeIf { it.isJsonObject }?.asJsonObject
+            ?.get("dns")?.takeIf { it.isJsonObject }?.asJsonObject
+            ?.get("hosts")?.takeIf { it.isJsonObject }?.asJsonObject
+            ?: return null
+        val value = hosts.get(server) ?: return null
+        return when {
+            value.isJsonPrimitive -> value.asString
+            value.isJsonArray -> value.asJsonArray.firstOrNull()?.takeIf { it.isJsonPrimitive }?.asString
+            else -> null
         }
     }
 

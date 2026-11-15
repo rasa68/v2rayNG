@@ -455,13 +455,24 @@ object CoreConfigManager {
      */
     private fun postProcessForSpeedtest(v2rayConfig: V2rayConfig) {
         v2rayConfig.log.loglevel = MmkvManager.decodeSettingsString(AppConfig.PREF_LOGLEVEL) ?: "warning"
+        // Keep the pre-resolved addresses of the proxy servers: the real connection reaches the server
+        // through them, so the test must too (otherwise it resolves the domain with the system resolver and
+        // may reach a different address than the one the real connection uses).
+        val serverHosts = proxyServerHosts(v2rayConfig)
         v2rayConfig.inbounds.clear()
         v2rayConfig.routing.rules.clear()
-        v2rayConfig.dns = null
+        v2rayConfig.dns = serverHosts?.let { V2rayConfig.DnsBean(hosts = it) }
         v2rayConfig.fakedns = null
         v2rayConfig.stats = null
         v2rayConfig.policy = null
-        v2rayConfig.outbounds.forEach { key -> key.mux = null }
+        // Mux is left as configured: a server that does not support it must fail the test like it fails for real.
+    }
+
+    /** The DNS host entries that map a proxy outbound's server domain to its pre-resolved address(es). */
+    private fun proxyServerHosts(v2rayConfig: V2rayConfig): Map<String, Any>? {
+        val hosts = v2rayConfig.dns?.hosts ?: return null
+        val serverDomains = v2rayConfig.getAllProxyOutbound().mapNotNull { it.getServerAddress() }.toSet()
+        return hosts.filterKeys { it in serverDomains }.takeIf { it.isNotEmpty() }
     }
 
     /**

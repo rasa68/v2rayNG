@@ -455,24 +455,49 @@ object CoreConfigManager {
      */
     private fun postProcessForSpeedtest(v2rayConfig: V2rayConfig) {
         v2rayConfig.log.loglevel = MmkvManager.decodeSettingsString(AppConfig.PREF_LOGLEVEL) ?: "warning"
-        // Keep the pre-resolved addresses of the proxy servers: the real connection reaches the server
-        // through them, so the test must too (otherwise it resolves the domain with the system resolver and
-        // may reach a different address than the one the real connection uses).
-        val serverHosts = proxyServerHosts(v2rayConfig)
+        // The native delay probe keeps only the outbounds, so the DNS hosts below would be ignored and the
+        // server domain resolved by the probe's own resolver. Pin the address the real connection uses instead.
+        pinServerAddressesForSpeedtest(v2rayConfig)
         v2rayConfig.inbounds.clear()
         v2rayConfig.routing.rules.clear()
-        v2rayConfig.dns = serverHosts?.let { V2rayConfig.DnsBean(hosts = it) }
+        v2rayConfig.dns = null
         v2rayConfig.fakedns = null
         v2rayConfig.stats = null
         v2rayConfig.policy = null
-        // Mux is left as configured: a server that does not support it must fail the test like it fails for real.
+        v2rayConfig.outbounds.forEach { key -> key.mux = null }
     }
 
-    /** The DNS host entries that map a proxy outbound's server domain to its pre-resolved address(es). */
-    private fun proxyServerHosts(v2rayConfig: V2rayConfig): Map<String, Any>? {
-        val hosts = v2rayConfig.dns?.hosts ?: return null
-        val serverDomains = v2rayConfig.getAllProxyOutbound().mapNotNull { it.getServerAddress() }.toSet()
-        return hosts.filterKeys { it in serverDomains }.takeIf { it.isNotEmpty() }
+    /**
+     * Replaces each proxy outbound's server domain with the address the real connection reaches it at.
+     *
+     * The real configuration maps the domain to an address resolved by the Android resolver (`dns.hosts`),
+     * but the delay probe drops the DNS section, so it would resolve the domain itself and may end up at a
+     * different address: a server could then test fine while the real connection to its resolved address
+     * fails. Names that default to the server address on the wire (TLS server name, the Host header, the
+     * gRPC authority) are set explicitly to the original domain so the handshake stays identical.
+     */
+    private fun pinServerAddressesForSpeedtest(v2rayConfig: V2rayConfig) {
+        val hosts = v2rayConfig.dns?.hosts ?: return
+        for (outbound in v2rayConfig.getAllProxyOutbound()) {
+            if (outbound.protocol.equals(EConfigType.WIREGUARD.name, true)) continue
+            val domain = outbound.getServerAddress()?.takeIf { it.isNotEmpty() } ?: continue
+            val address = when (val resolved = hosts[domain]) {
+                is String -> resolved
+                is List<*> -> resolved.firstOrNull() as? String
+                else -> null
+            }?.takeIf { it.isNotEmpty() } ?: continue
+
+            outbound.streamSettings?.let { stream ->
+                stream.tlsSettings?.let { if (it.serverName.isNullOrEmpty()) it.serverName = domain }
+                stream.realitySettings?.let { if (it.serverName.isNullOrEmpty()) it.serverName = domain }
+                stream.wsSettings?.let { if (it.host.isNullOrEmpty() && it.headers?.get("Host").isNullOrEmpty()) it.host = domain }
+                stream.httpupgradeSettings?.let { if (it.host.isNullOrEmpty()) it.host = domain }
+                stream.xhttpSettings?.let { if (it.host.isNullOrEmpty()) it.host = domain }
+                stream.httpSettings?.let { if (it.host.isEmpty()) it.host = listOf(domain) }
+                stream.grpcSettings?.let { if (it.authority.isNullOrEmpty()) it.authority = domain }
+            }
+            outbound.settings?.address = address
+        }
     }
 
     /**

@@ -180,6 +180,9 @@ fun SettingsScreen(
     var isBooted by rememberMmkvBool(AppConfig.PREF_IS_BOOTED, false)
     var delayTestUrl by rememberMmkvString(AppConfig.PREF_DELAY_TEST_URL, "")
     var realPingConcurrency by rememberMmkvString(AppConfig.PREF_REAL_PING_CONCURRENCY, "16")
+    var downloadTestSizeKb by rememberMmkvString(AppConfig.PREF_DOWNLOAD_TEST_SIZE_KB, "100")
+    var downloadTestTimeout by rememberMmkvString(AppConfig.PREF_DOWNLOAD_TEST_TIMEOUT, "10")
+    var downloadTestConcurrency by rememberMmkvString(AppConfig.PREF_DOWNLOAD_TEST_CONCURRENCY, "4")
     var ipApiUrl by rememberMmkvString(AppConfig.PREF_IP_API_URL, "")
 
     val isVpn = mode == VPN
@@ -668,6 +671,24 @@ fun SettingsScreen(
                     value = realPingConcurrency,
                     keyboardNumber = true,
                     onValueChanged = { realPingConcurrency = it }
+                )
+                SettingsEditItem(
+                    title = stringResource(R.string.title_pref_download_test_size),
+                    value = downloadTestSizeKb,
+                    keyboardNumber = true,
+                    onValueChanged = { downloadTestSizeKb = it }
+                )
+                SettingsEditItem(
+                    title = stringResource(R.string.title_pref_download_test_timeout),
+                    value = downloadTestTimeout,
+                    keyboardNumber = true,
+                    onValueChanged = { downloadTestTimeout = it }
+                )
+                SettingsEditItem(
+                    title = stringResource(R.string.title_pref_download_test_concurrency),
+                    value = downloadTestConcurrency,
+                    keyboardNumber = true,
+                    onValueChanged = { downloadTestConcurrency = it }
                 )
                 SettingsEditItem(
                     title = stringResource(R.string.title_pref_ip_api_url),

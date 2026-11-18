@@ -94,6 +94,11 @@ object AppConfig {
     const val PREF_AUTO_REMOVE_INVALID_AFTER_TEST = "pref_auto_remove_invalid_after_test"
     const val PREF_AUTO_SORT_AFTER_TEST = "pref_auto_sort_after_test"
     const val PREF_REAL_PING_CONCURRENCY = "pref_real_ping_concurrency"
+    const val PREF_DOWNLOAD_TEST_SIZE_KB = "pref_download_test_size_kb"
+    const val PREF_DOWNLOAD_TEST_TIMEOUT = "pref_download_test_timeout"
+    const val PREF_DOWNLOAD_TEST_CONCURRENCY = "pref_download_test_concurrency"
+    /** Public endpoint that returns exactly the requested number of bytes (Cloudflare's speed test). */
+    const val DOWNLOAD_TEST_URL = "https://speed.cloudflare.com/__down?bytes=%d"
 
     /** Cache keys. */
     const val CACHE_SUBSCRIPTION_ID = "cache_subscription_id"

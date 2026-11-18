@@ -574,5 +574,10 @@
     <string name="update_download_failed">Не удалось загрузить. Проверьте соединение и повторите попытку.</string>
     <string name="update_saved_in_downloads">Новая версия сохранена в папке «Загрузки» (%1$s). Откройте файл оттуда, чтобы установить.</string>
     <string name="connection_test_checking_ip">Проверка IP…</string>
+    <string name="title_download_time_all_server">Тест времени загрузки</string>
+    <string name="title_pref_download_test_size">Тест времени загрузки: объём (КБ)</string>
+    <string name="title_pref_download_test_timeout">Тест времени загрузки: максимальное ожидание (сек)</string>
+    <string name="title_pref_download_test_concurrency">Тест времени загрузки: одновременных тестов</string>
+    <string name="server_test_delay_seconds_value">%1$.1f с</string>
 
 </resources>

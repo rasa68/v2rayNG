@@ -293,6 +293,7 @@ class MainViewModel(
             MainAction.RefreshGroups -> setupGroupTab(forceRefresh = true)
             MainAction.TestAllServers -> testAllRealPing(true)
             MainAction.TestRealAllServers -> testAllRealPing()
+            MainAction.TestDownloadTimeAllServers -> testAllRealPing(downloadTime = true)
             MainAction.CancelTesting -> cancelAllPing()
             MainAction.RemoveAllServers -> removeAllServerAsync()
             MainAction.RemoveDuplicateServers -> removeDuplicateServerAsync()
@@ -859,7 +860,7 @@ class MainViewModel(
         }
     }
 
-    fun testAllRealPing(onlyTcp: Boolean = false) {
+    fun testAllRealPing(onlyTcp: Boolean = false, downloadTime: Boolean = false) {
         cancelAllPing()
         val groupId = uiState.value.selectedGroupId
         val servers = currentServers()
@@ -884,7 +885,8 @@ class MainViewModel(
             key = AppConfig.MSG_MEASURE_CONFIG_START,
             subscriptionId = groupId,
             serverGuids = if (keywordFilter.isNotEmpty()) serverGuids else emptyList(),
-            onlyTcp = onlyTcp
+            onlyTcp = onlyTcp,
+            downloadTime = downloadTime
         )
         _uiState.update {
             it.copy(

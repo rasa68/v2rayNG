@@ -568,5 +568,10 @@
     <string name="update_download_failed">Tải xuống thất bại. Hãy kiểm tra kết nối và thử lại.</string>
     <string name="update_saved_in_downloads">Phiên bản mới đã được lưu trong thư mục Tải xuống (%1$s). Hãy mở tệp từ đó để cài đặt.</string>
     <string name="connection_test_checking_ip">Đang kiểm tra IP…</string>
+    <string name="title_download_time_all_server">Kiểm tra thời gian tải xuống</string>
+    <string name="title_pref_download_test_size">Kiểm tra thời gian tải xuống: dung lượng (KB)</string>
+    <string name="title_pref_download_test_timeout">Kiểm tra thời gian tải xuống: thời gian chờ tối đa (giây)</string>
+    <string name="title_pref_download_test_concurrency">Kiểm tra thời gian tải xuống: số lượng kiểm tra đồng thời</string>
+    <string name="server_test_delay_seconds_value">%1$.1f giây</string>
 
 </resources>

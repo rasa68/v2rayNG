@@ -578,5 +578,10 @@
     <string name="update_download_failed">فشل التنزيل. تحقق من اتصالك وحاول مرة أخرى.</string>
     <string name="update_saved_in_downloads">تم حفظ الإصدار الجديد في مجلد التنزيلات (%1$s). افتح الملف من هناك لتثبيته.</string>
     <string name="connection_test_checking_ip">جارٍ فحص عنوان IP…</string>
+    <string name="title_download_time_all_server">اختبار زمن التنزيل</string>
+    <string name="title_pref_download_test_size">اختبار زمن التنزيل: الحجم (كيلوبايت)</string>
+    <string name="title_pref_download_test_timeout">اختبار زمن التنزيل: أقصى وقت انتظار (ثانية)</string>
+    <string name="title_pref_download_test_concurrency">اختبار زمن التنزيل: عدد الاختبارات المتزامنة</string>
+    <string name="server_test_delay_seconds_value">%1$.1f ث</string>
 
 </resources>

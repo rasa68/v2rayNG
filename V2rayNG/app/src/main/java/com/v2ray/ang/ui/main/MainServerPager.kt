@@ -348,10 +348,11 @@ private fun ServerListItem(
     doubleColumnDisplay: Boolean,
     actions: ServerRowActions
 ) {
-    val testResult = if (row.testDelayMillis == 0L) {
-        ""
-    } else {
-        stringResource(R.string.server_test_delay_value, row.testDelayMillis)
+    val testResult = when {
+        row.testDelayMillis == 0L -> ""
+        // Longer results (for example a download time) read better in seconds.
+        row.testDelayMillis >= 1000L -> stringResource(R.string.server_test_delay_seconds_value, row.testDelayMillis / 1000.0)
+        else -> stringResource(R.string.server_test_delay_value, row.testDelayMillis)
     }
     val selectedStateDescription = if (isSelected) {
         stringResource(R.string.acc_selected_server)

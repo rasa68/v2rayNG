@@ -381,6 +381,23 @@ object SettingsManager {
      * Get real ping concurrency.
      * @return The number of concurrent real-ping tests (clamped to 1..64).
      */
+    fun getDownloadTestSizeKb(): Int {
+        val value = MmkvManager.decodeSettingsString(AppConfig.PREF_DOWNLOAD_TEST_SIZE_KB)?.toIntOrNull() ?: 100
+        return value.coerceIn(1, 10240)
+    }
+
+    /** Longest time, in seconds, to wait for the test download before the result is a failure. */
+    fun getDownloadTestTimeoutSeconds(): Int {
+        val value = MmkvManager.decodeSettingsString(AppConfig.PREF_DOWNLOAD_TEST_TIMEOUT)?.toIntOrNull() ?: 10
+        return value.coerceIn(1, 120)
+    }
+
+    /** How many configs are tested at the same time by the download time test. */
+    fun getDownloadTestConcurrency(): Int {
+        val value = MmkvManager.decodeSettingsString(AppConfig.PREF_DOWNLOAD_TEST_CONCURRENCY)?.toIntOrNull() ?: 4
+        return value.coerceIn(1, 32)
+    }
+
     fun getRealPingConcurrency(): Int {
         val value = MmkvManager.decodeSettingsString(AppConfig.PREF_REAL_PING_CONCURRENCY)?.toIntOrNull() ?: 16
         return value.coerceIn(1, 128)

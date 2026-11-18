@@ -571,5 +571,10 @@
     <string name="update_download_failed">Yükləmə alınmadı. Bağlantını yoxlayıb yenidən cəhd et.</string>
     <string name="update_saved_in_downloads">Yeni versiya Yükləmələr qovluğunda saxlanıldı (%1$s). Quraşdırmaq üçün faylı oradan açın.</string>
     <string name="connection_test_checking_ip">IP yoxlanılır…</string>
+    <string name="title_download_time_all_server">Yükləmə vaxtı testi</string>
+    <string name="title_pref_download_test_size">Yükləmə vaxtı testi: ölçü (KB)</string>
+    <string name="title_pref_download_test_timeout">Yükləmə vaxtı testi: maksimum gözləmə müddəti (san)</string>
+    <string name="title_pref_download_test_concurrency">Yükləmə vaxtı testi: eyni vaxtda test sayı</string>
+    <string name="server_test_delay_seconds_value">%1$.1f san</string>
 
 </resources>

@@ -568,5 +568,10 @@
     <string name="update_download_failed">下載失敗，請檢查網路後重試。</string>
     <string name="update_saved_in_downloads">新版本已儲存至「下載」資料夾（%1$s）。請從該位置開啟以安裝。</string>
     <string name="connection_test_checking_ip">正在檢測 IP…</string>
+    <string name="title_download_time_all_server">下載耗時測試</string>
+    <string name="title_pref_download_test_size">下載耗時測試：資料量（KB）</string>
+    <string name="title_pref_download_test_timeout">下載耗時測試：最長等待時間（秒）</string>
+    <string name="title_pref_download_test_concurrency">下載耗時測試：同時測試數</string>
+    <string name="server_test_delay_seconds_value">%1$.1f 秒</string>
 
 </resources>

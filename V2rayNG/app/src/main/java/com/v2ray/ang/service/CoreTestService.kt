@@ -123,6 +123,7 @@ class CoreTestService : Service() {
                 context = this,
                 guids = guidsList,
                 onlyTcp = message.onlyTcp,
+                downloadTime = message.downloadTime,
                 onEvent = { event ->
                     if (activeWorkers.containsKey(worker)) {
                         handleWorkerEvent(event, message, requestId) { activeWorkers.remove(worker) }
@@ -162,7 +163,10 @@ class CoreTestService : Service() {
 
             is RealPingEvent.Finish -> {
                 if (message.subscriptionId.isNotEmpty()) {
-                    if (MmkvManager.decodeSettingsBool(AppConfig.PREF_AUTO_REMOVE_INVALID_AFTER_TEST, false)) {
+                    // A slow download is not proof that a config is invalid, so this test never removes configs.
+                    if (!message.downloadTime &&
+                        MmkvManager.decodeSettingsBool(AppConfig.PREF_AUTO_REMOVE_INVALID_AFTER_TEST, false)
+                    ) {
                         AngConfigManager.removeInvalidServer(message.subscriptionId)
                     }
 

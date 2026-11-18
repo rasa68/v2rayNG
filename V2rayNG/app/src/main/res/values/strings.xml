@@ -571,5 +571,10 @@
     <string name="update_download_failed">Download failed. Check your connection and try again.</string>
     <string name="update_saved_in_downloads">The new version was saved in the Downloads folder (%1$s). Open it from there to install it.</string>
     <string name="connection_test_checking_ip">Checking IP…</string>
+    <string name="title_download_time_all_server">Download time test</string>
+    <string name="title_pref_download_test_size">Download time test: size (KB)</string>
+    <string name="title_pref_download_test_timeout">Download time test: maximum wait time (seconds)</string>
+    <string name="title_pref_download_test_concurrency">Download time test: concurrent tests</string>
+    <string name="server_test_delay_seconds_value">%1$.1f s</string>
 
 </resources>
